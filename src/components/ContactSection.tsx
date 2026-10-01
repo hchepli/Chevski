@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { Mascot, MascotBubble, useMascot } from "./mascot";
+import { ArrowUpRight } from "lucide-react";
 
 type Field = "name" | "email" | "message";
 const FIELDS: Field[] = ["name", "email", "message"];
@@ -135,18 +136,22 @@ export default function ContactSection() {
             );
           })}
 
-          <button
-            type="submit"
-            disabled={sending}
-            className="mt-2 flex w-fit items-center gap-6 rounded-full bg-black py-2 pl-7 pr-2 text-sm font-medium text-white transition disabled:opacity-60"
-          >
-            {sending ? "ENVIANDO…" : "ENVIAR"}
-            <span className="grid h-11 w-11 place-items-center rounded-full bg-white text-black">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M7 17 17 7M8 7h9v9" />
-              </svg>
-            </span>
-          </button>
+<button
+  type="submit"
+  disabled={sending}
+  className="group relative mt-2 flex w-full items-center justify-between overflow-hidden rounded-full border-2 border-black bg-black py-2 pl-7 pr-2 text-sm font-medium text-white disabled:opacity-60 md:w-fit md:justify-start"
+>
+  <span className="whitespace-nowrap">
+    {sending ? "ENVIANDO…" : "ENVIAR"}
+  </span>
+
+  {/* Espaço reservado para o círculo */}
+  <span className="h-11 w-11 shrink-0 md:ml-6" aria-hidden />
+
+  <span className="absolute bottom-2 right-2 top-2 grid w-11 place-items-center rounded-full bg-white text-black transition-all duration-500 ease-in-out group-hover:w-[calc(100%-1rem)] group-disabled:w-11">
+    <ArrowUpRight size={18} strokeWidth={2} />
+  </span>
+</button>
         </form>
       </div>
     </section>

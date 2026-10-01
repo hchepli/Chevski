@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Bebas_Neue } from "next/font/google";
 import "./globals.css";
+import { Footer } from "@/components/Footer";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -15,7 +16,7 @@ const bebas = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "Software que sustenta o crescimento do seu negócio",
+  title: "Chevski - Software House",
   description: "Desenvolvimento de software sob medida.",
 };
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR">
       <body className={`${poppins.variable} ${bebas.variable} font-sans antialiased`}>
         {children}
+        <Footer />
       </body>
     </html>
   );

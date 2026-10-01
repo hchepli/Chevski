@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import Preloader from "@/components/Preloader";
 import ContactSection from "@/components/ContactSection";
 import { MascotProvider } from "@/components/mascot";
+import ProjectSection from "@/components/ProjectSection";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
         <Preloader />
         <Navbar />
         <Hero />
+        <ProjectSection />
         <ContactSection />
       </main>
     </MascotProvider>
