@@ -19,6 +19,10 @@ body {
   color: var(--ink);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
@@ -26,7 +30,3 @@ body {
   }
 }
 
-/* Bloub: troca o violeta da paleta pelo roxo da marca */
-.bloub-mascot [fill="#8b5cf6"] {
-  fill: #3c288c !important;
-}

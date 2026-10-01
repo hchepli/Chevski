@@ -1,13 +1,18 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Preloader from "@/components/Preloader";
+import ContactSection from "@/components/ContactSection";
+import { MascotProvider } from "@/components/mascot";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden">
-      <Preloader />
-      <Navbar />
-      <Hero />
-    </main>
+    <MascotProvider>
+      <main className="relative overflow-hidden">
+        <Preloader />
+        <Navbar />
+        <Hero />
+        <ContactSection />
+      </main>
+    </MascotProvider>
   );
 }
