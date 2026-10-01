@@ -8,7 +8,7 @@ import GlowShadow from "./GlowShadow";
 export default function Scene() {
   return (
     <Canvas
-      camera={{ position: [0, 0, 8], fov: 40 }}
+      camera={{ position: [0, 0, 7.5], fov: 40 }}
       dpr={[1, 2]}
       gl={{ alpha: true, antialias: true }}
       style={{ background: "transparent" }}

@@ -6,6 +6,8 @@ import gsap from "gsap";
 const WORD = "CHEVSKI".split("");
 const GRAY = "#9a9a9a";
 
+type PlWindow = Window & { __plReveal?: boolean };
+
 export default function Preloader() {
   const rootRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLImageElement>(null);
@@ -18,6 +20,7 @@ export default function Preloader() {
 
     const finish = () => {
       document.body.style.overflow = "";
+      (window as PlWindow).__plReveal = true;
       window.dispatchEvent(new Event("preloader:done"));
       setDone(true);
     };
@@ -105,9 +108,10 @@ export default function Preloader() {
         // Logo sozinha (87%)
         tl.to({}, { duration: 0.3 });
 
-        // Fase 3: impulso + voo até o header (87 → 99%)
+        // Fase 3: impulso + voo até o header (87 → 100%)
         tl.addLabel("fly");
         const FLY = 1.1;
+        const LIFT = 0.25;
 
         if (headerLogo && logoRef.current) {
           const logo = logoRef.current;
@@ -127,7 +131,7 @@ export default function Preloader() {
           );
 
           // pequeno impulso antes de decolar
-          tl.to(logo, { scale: 1.12, duration: 0.25, ease: "power2.out" }, "fly");
+          tl.to(logo, { scale: 1.12, duration: LIFT, ease: "power2.out" }, "fly");
           tl.to(
             logo,
             {
@@ -138,42 +142,58 @@ export default function Preloader() {
               ease: "expo.inOut",
               overwrite: "auto",
             },
-            "fly+=0.25"
+            `fly+=${LIFT}`
           );
-          count(99, FLY, "fly+=0.25");
-        } else {
-          count(99, 0.6, "fly");
         }
 
-        // o fundo branco vai clareando durante o voo, revelando o site
+        // contador linear durante todo o voo (87 → 100)
+        count(100, FLY, `fly+=${LIFT}`);
+
+        // ~90%: o site começa a aparecer (Hero escuta este evento)
+        const REVEAL = LIFT + FLY * 0.25;
+        tl.call(
+          () => {
+            (window as PlWindow).__plReveal = true;
+            window.dispatchEvent(new Event("preloader:reveal"));
+          },
+          undefined,
+          `fly+=${REVEAL}`
+        );
+
+        // o fundo branco clareia revelando o site
         tl.to(
           root,
           { backgroundColor: "rgba(255,255,255,0)", duration: 0.7, ease: "power1.inOut" },
-          `fly+=${0.25 + FLY * 0.35}`
+          `fly+=${REVEAL}`
+        );
+
+        // a porcentagem some em ~95%, antes de chegar no 100
+        tl.to(
+          percentRef.current,
+          { opacity: 0, duration: 0.25, ease: "none" },
+          `fly+=${LIFT + FLY * 0.55}`
         );
 
         // header entra em cascata enquanto a logo pousa
         tl.to(
           headerItems,
           { opacity: 1, y: 0, duration: 0.7, stagger: 0.12, ease: "power3.out" },
-          `fly+=${0.25 + FLY * 0.6}`
+          `fly+=${LIFT + FLY * 0.6}`
         );
 
         // crossfade sem corte: a logo do header aparece POR CIMA da que está
-        // pousando (um pouco antes de chegar) e só depois a do preloader some
-        tl.addLabel("land", `fly+=${0.25 + FLY}`);
+        // pousando e só depois a do preloader some
+        tl.addLabel("land", `fly+=${LIFT + FLY}`);
         if (headerLogo && logoRef.current) {
           tl.to(
             headerLogo,
             { opacity: 1, duration: 0.2, ease: "none" },
-            `fly+=${0.25 + FLY * 0.85}`
+            `fly+=${LIFT + FLY * 0.85}`
           );
           tl.set(logoRef.current, { opacity: 0 }, "land+=0.1");
         }
 
-        // Fase 4: 100% e some
-        count(100, 0.25, "land");
-        tl.to(percentRef.current, { opacity: 0, duration: 0.3, ease: "none" }, "land+=0.25");
+        // pequena folga antes de remover o preloader
         tl.to({}, { duration: 0.1 }, "land+=0.6");
       }, root);
     });

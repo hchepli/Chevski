@@ -9,7 +9,7 @@ const SPEED = 0.5; // rad/s
 const TILT = -0.2; // inclinação da órbita (rad)
 
 /**
- * Orbita a logo. Mesma caixa do canvas 3D: quando está "atrás" (z-index 0)
+ * Orbita a logo. Mesma caixa do palco (inset-0): quando está "atrás" (z-index 0)
  * a logo o esconde; "na frente" (z-index 20) passa por cima.
  * O estado (mood) vem do <MascotProvider>.
  */
@@ -49,8 +49,12 @@ export default function OrbitingMascot() {
   }, []);
 
   return (
-    <div ref={box} className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[55vh] min-h-[320px]" aria-hidden>
-      <div ref={bot} className="absolute left-1/2 top-1/2" style={{ marginLeft: -SIZE / 2, marginTop: -SIZE / 2 }}>
+    <div ref={box} className="pointer-events-none absolute inset-0 z-20" aria-hidden>
+      <div
+        ref={bot}
+        className="absolute left-1/2 top-1/2"
+        style={{ marginLeft: -SIZE / 2, marginTop: -SIZE / 2 }}
+      >
         <Mascot size={SIZE} />
       </div>
     </div>
