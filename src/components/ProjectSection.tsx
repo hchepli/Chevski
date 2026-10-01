@@ -30,6 +30,56 @@ const PROJETOS: Projects[] = [
 const DURATION = 10; // "unidades" da timeline
 const SCROLL_PER_UNIT = 40; // % da altura da tela por unidade
 
+/* --------------------------------------------------------------------------
+   Orelhas do shape. Ficam FORA da caixa da seção (acima do topo / abaixo da
+   base), então com a seção pinada elas estão fora da tela e só aparecem ao
+   rolar. Cada breakpoint tem a sua curva, tirada do SVG correspondente:
+
+     mobile  → shape-mobile-projects-section.svg  (87 x 35, curva de 33,6px)
+     desktop → shape-projects-section.svg         (135 x 40, curva de 39px)
+
+   O excedente do viewBox sobrepõe a seção (sem fresta).
+   -------------------------------------------------------------------------- */
+const EAR_MOBILE = {
+  tl: "left-0 -top-[33.6px]",
+  tr: "right-0 -top-[33.6px] -scale-x-100",
+  bl: "left-0 -bottom-[33.6px] -scale-y-100",
+  br: "right-0 -bottom-[33.6px] -scale-100",
+} as const;
+
+const EAR_DESKTOP = {
+  tl: "left-0 -top-[39px]",
+  tr: "right-0 -top-[39px] -scale-x-100",
+  bl: "left-0 -bottom-[39px] -scale-y-100",
+  br: "right-0 -bottom-[39px] -scale-100",
+} as const;
+
+function Ear({ pos }: { pos: keyof typeof EAR_MOBILE }) {
+  return (
+    <>
+      {/* mobile */}
+      <svg
+        viewBox="0 0 87 35"
+        aria-hidden="true"
+        className={`pointer-events-none absolute h-[35px] w-[87px] text-[var(--ink)] md:hidden ${EAR_MOBILE[pos]}`}
+        fill="currentColor"
+      >
+        <path d="M0 0H35.1143C40.1816 0 45.06 1.92348 48.7638 5.38178L73.2363 28.2325C76.94 31.6908 81.8184 33.6143 86.8857 33.6143H87V35H0Z" />
+      </svg>
+
+      {/* desktop */}
+      <svg
+        viewBox="0 0 135 40"
+        aria-hidden="true"
+        className={`pointer-events-none absolute hidden h-[40px] w-[135px] text-[var(--ink)] md:block ${EAR_DESKTOP[pos]}`}
+        fill="currentColor"
+      >
+        <path d="M0 0H79.9766C85.4374 0 90.6608 2.23291 94.4341 6.18037L119.732 32.6458C123.505 36.5933 128.729 38.8262 134.189 38.8262H135V40H0Z" />
+      </svg>
+    </>
+  );
+}
+
 export default function ProjectSection() {
   const root = useRef<HTMLElement>(null);
 
@@ -153,12 +203,20 @@ export default function ProjectSection() {
   );
 
   return (
+    // z-10: as orelhas precisam ficar por cima das seções vizinhas
+    // SEM overflow-hidden aqui, senão as orelhas (fora da caixa) são cortadas
     <section
       ref={root}
       id="projetos"
       data-header-theme="dark"
-      className="relative flex h-dvh flex-col gap-5 bg-[var(--ink)] px-6 pb-6 pt-24 text-white md:flex-row md:items-center md:gap-10 md:px-10 md:py-8"
+      className="relative z-10 flex h-dvh flex-col gap-5 bg-[var(--ink)] px-6 pb-6 pt-24 text-white md:flex-row md:items-center md:gap-10 md:px-10 md:py-8"
     >
+      {/* Orelhas do shape: só aparecem enquanto a seção rola */}
+      <Ear pos="tl" />
+      <Ear pos="tr" />
+      <Ear pos="bl" />
+      <Ear pos="br" />
+
       {/* No mobile, este wrapper "some" (contents) e os filhos viram itens
           da section, reordenados com order-*. No desktop vira a coluna. */}
       <div className="contents md:flex md:w-[333px] md:shrink-0 md:flex-col md:gap-24">

@@ -51,20 +51,37 @@ const socials = [
   },
 ];
 
-/** "Orelha" do topo: trecho do canto do Subtract.svg */
+/**
+ * "Orelha" do topo. Uma curva para cada breakpoint:
+ *   mobile  → shape-mobile-footer.svg  (86 x 26, curva de 25px)
+ *   desktop → Subtract.svg             (104 x 27, curva de 26px)
+ * O 1px extra no fim de cada viewBox sobrepõe o corpo (sem fresta).
+ */
 function Ear({ flip = false }: { flip?: boolean }) {
+  const side = flip ? "right-0 -scale-x-100" : "left-0";
+
   return (
-    <svg
-      viewBox="0 0 104 27"
-      aria-hidden="true"
-      className={`absolute top-0 h-[27px] w-[104px] ${
-        flip ? "right-0 -scale-x-100" : "left-0"
-      }`}
-      fill="black"
-    >
-      {/* o 27 (em vez de 26) sobrepõe 1px no corpo para não aparecer fresta */}
-      <path d="M0 0H52.8127C56.8433 0 60.7799 1.21783 64.1064 3.49385L91.8936 22.5061C95.2201 24.7822 99.1567 26 103.187 26H104V27H0Z" />
-    </svg>
+    <>
+      {/* mobile */}
+      <svg
+        viewBox="0 0 86 26"
+        aria-hidden="true"
+        className={`absolute top-0 h-[26px] w-[86px] md:hidden ${side}`}
+        fill="black"
+      >
+        <path d="M0 0H36.7366C40.8146 0 44.7951 1.24656 48.1445 3.5726L73.8555 21.4274C77.2049 23.7534 81.1854 25 85.2634 25H86V26H0Z" />
+      </svg>
+
+      {/* desktop */}
+      <svg
+        viewBox="0 0 104 27"
+        aria-hidden="true"
+        className={`absolute top-0 hidden h-[27px] w-[104px] md:block ${side}`}
+        fill="black"
+      >
+        <path d="M0 0H52.8127C56.8433 0 60.7799 1.21783 64.1064 3.49385L91.8936 22.5061C95.2201 24.7822 99.1567 26 103.187 26H104V27H0Z" />
+      </svg>
+    </>
   );
 }
 
@@ -155,8 +172,12 @@ function SocialLinks() {
 
 export function Footer() {
   return (
-    // pt-[26px] (e não mt no filho) evita o margin collapse que achatava a curva
-    <footer id="footer" className="relative pt-[26px] text-white">
+    // pt = altura da curva (25px mobile / 26px desktop). Usar padding e não mt
+    // no filho evita o margin collapse que achatava a curva
+    <footer
+      id="footer"
+      className="relative pt-[25px] text-white md:pt-[26px]"
+    >
       {/* Orelhas coladas nas laterais (cantos arredondados ficam fora da tela) */}
       <Ear />
       <Ear flip />
