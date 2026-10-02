@@ -4,6 +4,9 @@ import Preloader from "@/components/Preloader";
 import ContactSection from "@/components/ContactSection";
 import { MascotProvider } from "@/components/mascot";
 import ProjectSection from "@/components/ProjectSection";
+import Process from "@/components/Process";
+import Stack from "@/components/Stack";
+import Services from "@/components/Services";
 
 export default function Home() {
   return (
@@ -13,6 +16,9 @@ export default function Home() {
         <Navbar />
         <Hero />
         <ProjectSection />
+        <Services />
+        <Process />
+        <Stack />
         <ContactSection />
       </main>
     </MascotProvider>

@@ -20,11 +20,11 @@ type Projects = {
 
 // DADOS DE EXEMPLO: troque à vontade
 const PROJETOS: Projects[] = [
-  { cliente: "Empresa Um", nome: "Plataforma de Gestão", tipo: "Sistema web", cor: "from-[#3b2a8f] to-[#7b6cf0]" },
-  { cliente: "Empresa Dois", nome: "App de Entregas", tipo: "Aplicativo mobile", cor: "from-[#0f766e] to-[#5eead4]" },
-  { cliente: "Empresa Três", nome: "Painel Financeiro", tipo: "Dashboard / BI", cor: "from-[#9a3412] to-[#fdba74]" },
-  { cliente: "Empresa Quatro", nome: "Portal do Cliente", tipo: "Portal + API", cor: "from-[#1e3a8a] to-[#93c5fd]" },
-  { cliente: "Empresa Cinco", nome: "Automação de Estoque", tipo: "Integração / ERP", cor: "from-[#831843] to-[#f9a8d4]" },
+  { cliente: "CHP Smart", nome: "CHP Smart", tipo: "Site Institucional", cor: "from-[#3b2a8f] to-[#7b6cf0]" },
+  { cliente: "Paróquia Divino Espírito Santo", nome: "Paróquia Divino Espírito Santo", tipo: "Sistema Sob Medida", cor: "from-[#0f766e] to-[#5eead4]" },
+  { cliente: "Hidro Smart", nome: "Hidro Smart", tipo: "Site Institucional", cor: "from-[#9a3412] to-[#fdba74]" },
+  { cliente: "Velp Mais", nome: "Velp Mais", tipo: "Site Institucional", cor: "from-[#1e3a8a] to-[#93c5fd]" },
+  { cliente: "Conceitto", nome: "Conceitto", tipo: "Sistema Sob Medida", cor: "from-[#831843] to-[#f9a8d4]" },
 ];
 
 const DURATION = 10; // "unidades" da timeline
