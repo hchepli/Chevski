@@ -102,7 +102,10 @@ export default function Process() {
           obj.add(new THREE.Mesh(boxGeo, faceMat));
           obj.add(new THREE.LineSegments(edgeGeo, lineMat));
           const home = new THREE.Vector3(x, y, z);
-          const dir = home.length() > 0 ? home.clone().normalize() : new THREE.Vector3(rnd(n + 1), rnd(n + 2), rnd(n + 3));
+          const dir =
+            home.length() > 0
+              ? home.clone().normalize()
+              : new THREE.Vector3(rnd(n + 1), rnd(n + 2), rnd(n + 3));
           const off = dir
             .multiplyScalar(1.6 + (rnd(n + 4) + 1) * 1.4)
             .add(new THREE.Vector3(rnd(n + 5), rnd(n + 6), rnd(n + 7)).multiplyScalar(1.1));
@@ -170,41 +173,71 @@ export default function Process() {
     };
   }, []);
 
-  /* ───────── Scroll horizontal (pin) ───────── */
+  /* ───────── Scroll horizontal (pin) com pausa em cada tela ───────── */
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const dist = () => (track.current?.scrollWidth ?? 0) - window.innerWidth;
+        const N = STEPS.length;
+        const DURATION = 10; // unidades da timeline
+        const SCROLL_PER_UNIT = 40; // % da altura da tela por unidade
+        const HOLD = DURATION * 0.06; // respiro no começo/fim
+        const step = (DURATION - HOLD * 2) / (N - 1); // espaço de cada etapa
+        const TRANS = step * 0.4; // só 40% é movimento, 60% é pausa
 
-        gsap.to(track.current, {
-          x: () => -dist(),
-          ease: "none",
+        const state = { p: 0 };
+        const update = () => {
+          progress.current = state.p;
+          if (fill.current) fill.current.style.transform = `scaleX(${state.p})`;
+          if (counter.current) {
+            counter.current.textContent = pad(Math.round(state.p * (N - 1)) + 1);
+          }
+        };
+
+        const tl = gsap.timeline({
           scrollTrigger: {
             trigger: root.current,
             start: "top top",
-            end: () => "+=" + dist(),
+            end: "+=" + DURATION * SCROLL_PER_UNIT + "%",
             pin: true,
-            scrub: 0.6,
+            scrub: 0.3,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-            // remova o snap se preferir scroll 100% livre
-            snap: {
-              snapTo: 1 / (STEPS.length - 1),
-              duration: { min: 0.2, max: 0.6 },
-              delay: 0.05,
-            },
-            onUpdate: (self) => {
-              const p = self.progress;
-              progress.current = p;
-              if (fill.current) fill.current.style.transform = `scaleX(${p})`;
-              if (counter.current) {
-                counter.current.textContent = pad(Math.round(p * (STEPS.length - 1)) + 1);
-              }
-            },
           },
         });
+
+        // reserva a duração total
+        tl.to({}, { duration: DURATION }, 0);
+
+        for (let k = 1; k < N; k++) {
+          const at = HOLD + (k - 1) * step;
+
+          // move o trilho de uma tela para a próxima
+          tl.to(
+            track.current,
+            {
+              x: () => -k * window.innerWidth,
+              ease: "power2.inOut",
+              duration: TRANS,
+            },
+            at
+          );
+
+          // progresso (cubo, barra e contador) acompanha a mesma transição
+          tl.to(
+            state,
+            {
+              p: k / (N - 1),
+              ease: "power2.inOut",
+              duration: TRANS,
+              onUpdate: update,
+            },
+            at
+          );
+        }
+
+        update();
       });
 
       return () => mm.revert();

@@ -1,290 +1,105 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import * as THREE from "three";
+import { ArrowUpRight } from "lucide-react";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const SERVICES = [
+type Service = {
+  title: string;
+  text: string;
+  imagem?: string; // quando tiver a foto/print do sistema: "/servicos/web.webp"
+  cor: string; // gradiente de placeholder
+};
+
+// DADOS DE EXEMPLO: troque as imagens por prints de projetos reais
+const SERVICES: Service[] = [
   {
     title: "Sistemas web sob medida",
     text: "Plataformas, portais e sistemas internos feitos para a rotina da sua empresa e prontos para crescer.",
-    tags: ["Next.js", "Django", "PostgreSQL"],
+    cor: "from-[#0f766e] to-[#5eead4]",
   },
   {
     title: "Apps mobile",
     text: "Aplicativos para iOS e Android com a cara da sua marca, rápidos e fáceis de usar.",
-    tags: ["iOS", "Android", "Notificações"],
+    cor: "from-[#3b2a8f] to-[#7b6cf0]",
   },
   {
     title: "Dashboards e BI",
     text: "Seus dados em painéis claros, para decidir com números e não no achismo.",
-    tags: ["Indicadores", "Relatórios", "Tempo real"],
+    cor: "from-[#1e3a8a] to-[#93c5fd]",
   },
   {
     title: "Integrações e ERP",
     text: "Conectamos sistemas, planilhas e ferramentas para os dados pararem de ser digitados duas vezes.",
-    tags: ["APIs", "ERP", "Sincronização"],
+    cor: "from-[#9a3412] to-[#fdba74]",
   },
   {
     title: "Automações",
     text: "Tarefas repetitivas viram rotinas automáticas: menos erro e menos horas perdidas.",
-    tags: ["Fluxos", "Python", "Alertas"],
+    cor: "from-[#831843] to-[#f9a8d4]",
   },
   {
     title: "UX/UI Design",
     text: "Interfaces pensadas com quem vai usar, validadas no Figma antes de qualquer linha de código.",
-    tags: ["Figma", "Protótipo", "Design system"],
+    cor: "from-[#334155] to-[#94a3b8]",
   },
 ];
 
-// cor das faces: use a cor de fundo do seu site
-const FACE_COLOR = 0xffffff;
-const LINE_COLOR = 0x000000;
+const pad = (n: number) => String(n).padStart(2, "0");
 
-type Api = { set: (i: number, instant?: boolean) => void };
+/* Imagem do serviço: foto quando existir, gradiente enquanto isso */
+function Media({ s, i, className }: { s: Service; i: number; className: string }) {
+  return (
+    <div
+      className={`relative overflow-hidden bg-gradient-to-br ${s.cor} ${className}`}
+    >
+      {s.imagem ? (
+        <Image src={s.imagem} alt={s.title} fill className="object-cover" />
+      ) : (
+        <span className="absolute bottom-2 left-3 text-3xl font-bold text-white/30">
+          {pad(i + 1)}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export default function Services() {
   const root = useRef<HTMLElement>(null);
-  const stage = useRef<HTMLDivElement>(null);
-  const api = useRef<Api | null>(null);
-  const active = useRef(0);
 
-  /* ───────── Objeto 3D: um formato por serviço ───────── */
-  useEffect(() => {
-    const el = stage.current;
-    if (!el) return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-    camera.position.set(0, 0, 10.5);
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.domElement.className = "block h-full w-full";
-    el.appendChild(renderer.domElement);
-
-    const faceMat = new THREE.MeshBasicMaterial({
-      color: FACE_COLOR,
-      polygonOffset: true,
-      polygonOffsetFactor: 1,
-      polygonOffsetUnits: 1,
-    });
-    const lineMat = new THREE.LineBasicMaterial({ color: LINE_COLOR });
-    const disposables: { dispose: () => void }[] = [faceMat, lineMat];
-
-    // adiciona uma peça (faces + arestas) a um grupo
-    const piece = (
-      parent: THREE.Group,
-      geo: THREE.BufferGeometry,
-      pos: [number, number, number] = [0, 0, 0],
-      rot: [number, number, number] = [0, 0, 0]
-    ) => {
-      const edges = new THREE.EdgesGeometry(geo, 25);
-      disposables.push(geo, edges);
-      const g = new THREE.Group();
-      g.add(new THREE.Mesh(geo, faceMat), new THREE.LineSegments(edges, lineMat));
-      g.position.set(...pos);
-      g.rotation.set(...rot);
-      parent.add(g);
-    };
-    const box = (w: number, h: number, d: number) => new THREE.BoxGeometry(w, h, d);
-
-    const shapes: THREE.Group[] = [];
-    const make = (build: (g: THREE.Group) => void) => {
-      const g = new THREE.Group();
-      build(g);
-      g.scale.setScalar(0);
-      shapes.push(g);
-    };
-
-    // 0 · Sistemas web: janela de navegador com menu e conteúdo
-    make((g) => {
-      piece(g, box(3.6, 2.5, 0.14));
-      piece(g, box(3.6, 0.4, 0.22), [0, 1.05, 0.04]);
-      piece(g, box(0.85, 1.5, 0.22), [-1.3, -0.3, 0.04]);
-      piece(g, box(2.1, 0.8, 0.22), [0.5, 0.15, 0.04]);
-      piece(g, box(2.1, 0.5, 0.22), [0.5, -0.85, 0.04]);
-    });
-
-    // 1 · Apps mobile: celular
-    make((g) => {
-      piece(g, box(1.5, 2.9, 0.22));
-      piece(g, box(1.28, 2.45, 0.26), [0, -0.05, 0]);
-      piece(g, box(0.45, 0.09, 0.3), [0, 1.28, 0]);
-    });
-
-    // 2 · Dashboards e BI: gráfico de barras
-    make((g) => {
-      const heights = [1, 1.8, 1.3, 2.4, 3];
-      piece(g, box(3.9, 0.14, 1.3), [0, -1.57, 0]);
-      heights.forEach((h, i) => {
-        piece(g, box(0.5, h, 0.7), [-1.5 + i * 0.75, -1.5 + h / 2, 0]);
-      });
-    });
-
-    // 3 · Integrações e ERP: dois elos encaixados
-    make((g) => {
-      piece(g, new THREE.TorusGeometry(1, 0.28, 8, 20), [-0.7, 0, 0]);
-      piece(g, new THREE.TorusGeometry(1, 0.28, 8, 20), [0.7, 0, 0], [Math.PI / 2, 0, 0]);
-    });
-
-    // 4 · Automações: engrenagem
-    make((g) => {
-      const teeth = 10;
-      const outer = 1.5;
-      const inner = 1.15;
-      const shape = new THREE.Shape();
-      const step = (Math.PI * 2) / teeth;
-      const pts: [number, number][] = [];
-      for (let t = 0; t < teeth; t++) {
-        const a0 = t * step;
-        [
-          [0, inner],
-          [0.15, outer],
-          [0.45, outer],
-          [0.6, inner],
-        ].forEach(([f, r]) => {
-          pts.push([Math.cos(a0 + f * step) * r, Math.sin(a0 + f * step) * r]);
-        });
-      }
-      pts.forEach(([x, y], i) => (i === 0 ? shape.moveTo(x, y) : shape.lineTo(x, y)));
-      shape.closePath();
-      const hole = new THREE.Path();
-      hole.absarc(0, 0, 0.5, 0, Math.PI * 2, true);
-      shape.holes.push(hole);
-      const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.6, bevelEnabled: false });
-      geo.center();
-      piece(g, geo);
-    });
-
-    // 5 · UX/UI: camadas de interface empilhadas
-    make((g) => {
-      piece(g, box(3, 0.12, 2.2), [0, -0.8, 0]);
-      piece(g, box(3, 0.12, 2.2), [0.2, 0, 0.2]);
-      piece(g, box(3, 0.12, 2.2), [0.4, 0.8, 0.4]);
-    });
-
-    const wrapper = new THREE.Group();
-    wrapper.rotation.x = 0.4;
-    shapes.forEach((s) => wrapper.add(s));
-    scene.add(wrapper);
-
-    // troca de formato: o atual encolhe, o novo cresce
-    let cur = -1;
-    const set = (i: number, instant = false) => {
-      if (i === cur) return;
-      cur = i;
-      shapes.forEach((s) => gsap.killTweensOf(s.scale));
-      shapes.forEach((s, idx) => {
-        if (idx === i) {
-          if (instant) s.scale.setScalar(1);
-          else
-            gsap.fromTo(
-              s.scale,
-              { x: 0, y: 0, z: 0 },
-              { x: 1, y: 1, z: 1, duration: 0.7, ease: "back.out(1.7)", delay: 0.25 }
-            );
-        } else if (s.scale.x > 0) {
-          if (instant) s.scale.setScalar(0);
-          else gsap.to(s.scale, { x: 0, y: 0, z: 0, duration: 0.3, ease: "power2.in" });
-        }
-      });
-    };
-    api.current = { set };
-    set(active.current, true);
-
-    const resize = () => {
-      const w = el.clientWidth || 1;
-      const h = el.clientHeight || 1;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    };
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(el);
-
-    let visible = true;
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
-    io.observe(el);
-
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const tick = (time: number) => {
-      if (!visible) return;
-      wrapper.rotation.y = reduce ? 0.6 : time * 0.35;
-      shapes.forEach((s) => (s.visible = s.scale.x > 0.001));
-      renderer.render(scene, camera);
-    };
-    gsap.ticker.add(tick);
-
-    return () => {
-      api.current = null;
-      gsap.ticker.remove(tick);
-      shapes.forEach((s) => gsap.killTweensOf(s.scale));
-      ro.disconnect();
-      io.disconnect();
-      disposables.forEach((d) => d.dispose());
-      renderer.dispose();
-      renderer.domElement.remove();
-    };
-  }, []);
-
-  /* ───────── Tela fixa: o scroll só troca o serviço ───────── */
+  /* ───────── Tela fixa: o scroll só abre o próximo serviço ───────── */
   useGSAP(
     () => {
-      const items = gsap.utils.toArray<HTMLElement>(".servico", root.current);
-      const pips = gsap.utils.toArray<HTMLElement>(".pip", root.current);
+      const el = root.current!;
+      const rows = gsap.utils.toArray<HTMLElement>(".row", el);
+      const counter = el.querySelector<HTMLElement>(".counter");
+      const fill = el.querySelector<HTMLElement>(".fill");
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const n = items.length;
+      const n = rows.length;
+
+      // sem animação: todos abertos, sem pin
+      if (reduce) {
+        rows.forEach((r) => r.setAttribute("data-active", "true"));
+        return;
+      }
+
       let cur = -1;
-
-      const go = (i: number, first = false) => {
+      const go = (i: number) => {
         if (i === cur) return;
-        const dir = i > cur ? 1 : -1;
         cur = i;
-        active.current = i;
-        api.current?.set(i, first || reduce);
-
-        pips.forEach((p, j) =>
-          gsap.to(p, {
-            width: j === i ? 44 : 24,
-            backgroundColor: j === i ? "#000000" : "rgba(0,0,0,0.2)",
-            duration: first || reduce ? 0 : 0.3,
-            overwrite: true,
-          })
-        );
-
-        items.forEach((it, j) => {
-          if (first || reduce) {
-            gsap.set(it, { autoAlpha: j === i ? 1 : 0, y: 0 });
-          } else if (j === i) {
-            gsap.fromTo(
-              it,
-              { autoAlpha: 0, y: 32 * dir },
-              { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.2, overwrite: true }
-            );
-          } else {
-            gsap.to(it, {
-              autoAlpha: 0,
-              y: -32 * dir,
-              duration: 0.3,
-              ease: "power2.in",
-              overwrite: true,
-            });
-          }
-        });
+        rows.forEach((r, j) => r.setAttribute("data-active", String(j === i)));
+        if (counter) counter.textContent = pad(i + 1);
       };
-
-      go(0, true);
+      go(0);
 
       ScrollTrigger.create({
-        trigger: root.current,
+        trigger: el,
         start: "top top",
-        end: () => "+=" + (n - 1) * window.innerHeight * 0.7,
+        end: () => "+=" + (n - 1) * window.innerHeight * 0.6,
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
@@ -294,7 +109,10 @@ export default function Services() {
           duration: { min: 0.2, max: 0.5 },
           delay: 0.05,
         },
-        onUpdate: (self) => go(Math.round(self.progress * (n - 1))),
+        onUpdate: (self) => {
+          go(Math.round(self.progress * (n - 1)));
+          if (fill) fill.style.transform = `scaleX(${self.progress})`;
+        },
       });
     },
     { scope: root }
@@ -304,58 +122,90 @@ export default function Services() {
     <section
       ref={root}
       id="servicos"
-      className="relative grid h-screen grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden px-6 pb-8 pt-24 md:grid-cols-2 md:grid-rows-[auto_1fr] md:gap-x-10 md:gap-y-0 md:px-10 md:pb-12 md:pt-32"
+      className="relative flex h-screen flex-col overflow-hidden px-6 pb-20 pt-32 md:px-10 md:pb-24 md:pt-[clamp(7rem,15vh,11rem)] motion-reduce:h-auto motion-reduce:overflow-visible motion-reduce:py-20"
     >
-      {/* Título (no mobile fica em cima) */}
-      <h2 className="text-xl leading-tight md:col-start-1 md:row-start-1 md:text-[43px]">
-        <span className="block font-bold">O que a gente constrói</span>
-        <span className="block font-light text-[var(--muted)]">
-          sob medida para o seu negócio.
-        </span>
-      </h2>
+      {/* Topo: título + contador */}
+      <div className="flex items-start justify-between gap-6">
+        <h2 className="text-[clamp(1.6rem,min(4.2vw,6.5vh),3.5rem)] leading-[1.05] tracking-tight">
+          <span className="block font-bold">O que a gente constrói</span>
+          <span className="block font-light text-[var(--muted)]">
+            sob medida para o seu negócio.
+          </span>
+        </h2>
 
-      {/* 3D: direita no desktop, entre o título e o texto no mobile */}
-      <div
-        aria-hidden
-        className="relative min-h-0 md:col-start-2 md:row-span-2 md:row-start-1"
-      >
-        <div ref={stage} className="pointer-events-none absolute inset-0" />
+        <span className="pt-2 text-sm font-medium tabular-nums motion-reduce:hidden">
+          <span className="counter">01</span>
+          <span className="text-[var(--muted)]"> / {pad(SERVICES.length)}</span>
+        </span>
       </div>
 
-      {/* Texto: todos empilhados na mesma célula, só um visível por vez */}
-      <div className="flex flex-col justify-center md:col-start-1 md:row-start-2">
-        <div className="grid">
-          {SERVICES.map((s) => (
-            <article
-              key={s.title}
-              className="servico invisible col-start-1 row-start-1 flex flex-col gap-3 opacity-0 md:gap-5"
-            >
-              <h3 className="text-[clamp(1.75rem,6vw,4.25rem)] font-bold leading-[1.05] tracking-tight md:text-[clamp(2.5rem,4.5vw,4.25rem)]">
-                {s.title}
-              </h3>
-              <p className="max-w-md text-sm font-light text-[var(--muted)] md:text-lg">
+      {/* Lista: a linha ativa vira um bloco preto com a imagem inclinada */}
+      <ul className="mt-6 flex min-h-0 flex-1 flex-col justify-center md:mt-8">
+        {SERVICES.map((s, i) => (
+          <li
+            key={s.title}
+            data-active="false"
+            className="row group relative rounded-[24px] px-4 py-3 text-black transition-colors duration-500 after:absolute after:inset-x-4 after:bottom-0 after:h-[2px] after:bg-black/15 after:transition-opacity after:duration-300 data-[active=true]:bg-[var(--ink)] data-[active=true]:text-white data-[active=true]:after:opacity-0 md:rounded-[32px] md:px-8 md:py-[clamp(0.6rem,1.8vh,1.4rem)] md:after:inset-x-8"
+          >
+            <div className="flex items-center gap-4 md:grid md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_auto] md:gap-8">
+              {/* número + título */}
+              <div className="flex flex-1 items-center gap-3 md:gap-6">
+                <span className="w-6 shrink-0 text-xs font-medium tabular-nums opacity-50 md:w-8 md:text-sm">
+                  {pad(i + 1)}
+                </span>
+                <h3 className="text-[clamp(1.15rem,min(3.1vw,4.8vh),2.75rem)] font-bold leading-[1.05] tracking-tight opacity-35 transition-opacity duration-300 group-data-[active=true]:opacity-100">
+                  {s.title}
+                </h3>
+              </div>
+
+              {/* descrição (desktop) */}
+              <p className="hidden max-w-sm text-sm font-light text-[var(--muted)] transition-colors duration-300 group-data-[active=true]:text-white/70 md:block">
                 {s.text}
               </p>
-              <ul className="flex flex-wrap gap-2">
-                {s.tags.map((t) => (
-                  <li
-                    key={t}
-                    className="rounded-full border-2 border-black px-3 py-1 text-xs font-medium md:px-4 md:py-1.5 md:text-sm"
-                  >
-                    {t}
-                  </li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
 
-        {/* Indicador de qual serviço está ativo */}
-        <div aria-hidden className="mt-6 flex items-center gap-2 md:mt-10">
-          {SERVICES.map((s) => (
-            <span key={s.title} className="pip h-[3px] w-6 bg-black/20" />
-          ))}
-        </div>
+              {/* imagem inclinada + seta */}
+              <div className="flex items-center gap-4 md:gap-6">
+                <div aria-hidden className="relative hidden w-44 self-stretch md:block">
+                  <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+                    <div className="scale-75 rotate-0 opacity-0 transition-all duration-500 ease-out group-data-[active=true]:rotate-6 group-data-[active=true]:scale-100 group-data-[active=true]:opacity-100">
+                      <Media
+                        s={s}
+                        i={i}
+                        className="h-[clamp(6rem,15vh,9rem)] w-40 rounded-2xl border-2 border-white/80 shadow-xl"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <a
+                  href="#contato"
+                  aria-label={`Falar sobre ${s.title}`}
+                  className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-black transition-colors duration-300 group-data-[active=true]:border-white group-data-[active=true]:bg-white group-data-[active=true]:text-black md:size-12"
+                >
+                  <ArrowUpRight strokeWidth={1.8} className="size-4 md:size-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* mobile: descrição + imagem abrem embaixo */}
+            <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 ease-out group-data-[active=true]:grid-rows-[1fr] md:hidden motion-reduce:grid-rows-[1fr]">
+              <div className="min-h-0 overflow-hidden">
+                <div className="flex flex-col gap-3 pb-1 pl-9 pt-3">
+                  <p className="text-sm font-light text-white/70">{s.text}</p>
+                  <Media s={s} i={i} className="h-24 w-full rounded-2xl" />
+                </div>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Linha de progresso (igual à do Process) */}
+      <div
+        aria-hidden
+        className="absolute inset-x-6 bottom-8 h-[3px] bg-black/15 md:inset-x-10 md:bottom-10 motion-reduce:hidden"
+      >
+        <span className="fill block h-full origin-left scale-x-0 bg-black" />
       </div>
     </section>
   );
