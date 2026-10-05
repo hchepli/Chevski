@@ -13,7 +13,6 @@ export default function Home() {
     <MascotProvider>
       <main className="relative overflow-hidden">
         <Preloader />
-        <Navbar />
         <Hero />
         <ProjectSection />
         <Services />

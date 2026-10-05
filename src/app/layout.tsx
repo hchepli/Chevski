@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Bebas_Neue } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className={`${poppins.variable} ${bebas.variable} font-sans antialiased`}>
+        <Navbar />
         {children}
         <Footer />
       </body>
